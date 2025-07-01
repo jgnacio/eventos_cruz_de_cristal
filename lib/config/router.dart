@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../shared/widgets/main_scaffold.dart';
+import '../features/fasting/presentation/screens/screens.dart';
+import '../features/auth/presentation/screens/user_selector_screen.dart';
+import '../features/events/presentation/screens/screens.dart';
+import '../features/church/presentation/screens/screens.dart';
 
 // Importar screens cuando estén creadas
 // import '../features/auth/presentation/screens/splash_screen.dart';
@@ -31,6 +35,7 @@ class AppRouter {
   static const String adminEvents = '/admin/events';
   static const String adminRequests = '/admin/requests';
   static const String adminAnalytics = '/admin/analytics';
+  static const String userSelector = '/user-selector';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -163,6 +168,12 @@ class AppRouter {
         path: adminAnalytics,
         builder: (context, state) => const AdminAnalyticsScreen(),
       ),
+      
+      // Testing Routes
+      GoRoute(
+        path: userSelector,
+        builder: (context, state) => const UserSelectorScreen(),
+      ),
     ],
     errorBuilder: (context, state) => const NotFoundScreen(),
   );
@@ -176,51 +187,223 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> 
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _scaleController;
+  late AnimationController _slideController;
+  
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
+    _initAnimations();
+    _startAnimations();
     _navigateToHome();
   }
 
+  void _initAnimations() {
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _scaleController,
+      curve: Curves.elasticOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+  }
+
+  void _startAnimations() {
+    _fadeController.forward();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _scaleController.forward();
+    });
+    Future.delayed(const Duration(milliseconds: 600), () {
+      _slideController.forward();
+    });
+  }
+
   _navigateToHome() async {
-    // Simular tiempo de carga (2 segundos)
-    await Future.delayed(const Duration(seconds: 2));
+    // Simular tiempo de carga (3 segundos para ver las animaciones)
+    await Future.delayed(const Duration(seconds: 3));
     
     if (mounted) {
-      // Por ahora navegar directamente al login
-      // En el futuro aquí verificarías si el usuario ya está autenticado
-      context.go('/login');
+      // Navegar al selector de usuarios para testing
+      // En producción, aquí verificarías si el usuario ya está autenticado
+      context.go('/user-selector');
     }
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _scaleController.dispose();
+    _slideController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.church,
-              size: 80,
-              color: Colors.white,
-            ),
-            SizedBox(height: 24),
-            Text(
-              'Eventos Cruz de Cristal',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.tertiary,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.church_rounded,
+                        size: 80,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  SlideTransition(
+                    position: _slideAnimation,
+                    child: Column(
+                      children: [
+                        Text(
+                          'Eventos',
+                          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Cruz de Cristal',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 48),
+                  
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Cargando...',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      '"Porque donde están dos o tres congregados en mi nombre, allí estoy yo en medio de ellos."',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  Text(
+                    'Mateo 18:20',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 32),
-            CircularProgressIndicator(
-              color: Colors.white,
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -344,138 +527,316 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Eventos Cruz de Cristal'),
-        automaticallyImplyLeading: false, // No mostrar flecha hacia atrás
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () => context.go('/notifications'),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).colorScheme.primary.withOpacity(0.05),
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.tertiary.withOpacity(0.03),
+            ],
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const Text(
-              '¡Bienvenido!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 32),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                children: [
-                  _buildMenuCard(
-                    context,
-                    'Eventos',
-                    Icons.event,
-                    Colors.blue,
-                    () => context.go('/events'),
-                  ),
-                  _buildMenuCard(
-                    context,
-                    'Iglesias',
-                    Icons.church,
-                    Colors.purple,
-                    () => context.go('/churches'),
-                  ),
-                  _buildMenuCard(
-                    context,
-                    'Ayunos',
-                    Icons.favorite,
-                    Colors.red,
-                    () => context.go('/fasting'),
-                  ),
-                  _buildMenuCard(
-                    context,
-                    'Configuración',
-                    Icons.settings,
-                    Colors.grey,
-                    () => context.go('/settings'),
+        ),
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 120,
+                floating: true,
+                pinned: false,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: _buildHeader(context),
+                ),
+                actions: [
+                  Container(
+                    margin: const EdgeInsets.only(right: 16, top: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.notifications_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: () => context.go('/notifications'),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 48, color: color),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.1,
+                  ),
+                  delegate: SliverChildListDelegate([
+                    _buildFeatureCard(
+                      context: context,
+                      title: 'Eventos',
+                      subtitle: 'Próximos cultos y actividades',
+                      icon: Icons.event_note_rounded,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                        ],
+                      ),
+                      onTap: () => context.go('/events'),
+                    ),
+                    _buildFeatureCard(
+                      context: context,
+                      title: 'Iglesias',
+                      subtitle: 'Encuentra tu congregación',
+                      icon: Icons.church_rounded,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Theme.of(context).colorScheme.secondary,
+                          Theme.of(context).colorScheme.secondary.withOpacity(0.8),
+                        ],
+                      ),
+                      onTap: () => context.go('/churches'),
+                    ),
+                    _buildFeatureCard(
+                      context: context,
+                      title: 'Ayunos',
+                      subtitle: 'Únete en oración y ayuno',
+                      icon: Icons.favorite_rounded,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Theme.of(context).colorScheme.tertiary,
+                          Theme.of(context).colorScheme.tertiary.withOpacity(0.8),
+                        ],
+                      ),
+                      onTap: () => context.go('/fasting'),
+                    ),
+                    _buildFeatureCard(
+                      context: context,
+                      title: 'Configuración',
+                      subtitle: 'Personaliza tu experiencia',
+                      icon: Icons.settings_rounded,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.grey.shade600,
+                          Colors.grey.shade500,
+                        ],
+                      ),
+                      onTap: () => context.go('/settings'),
+                    ),
+                  ]),
+                ),
               ),
-            ),
-          ],
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverToBoxAdapter(
+                  child: _buildInspirationalSection(context),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-}
 
-class EventsScreen extends StatelessWidget {
-  const EventsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Eventos'),
-        automaticallyImplyLeading: false, // No mostrar flecha hacia atrás
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => context.go('/create-event'),
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.church_rounded,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '¡Bienvenido!',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      'Cruz de Cristal',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Lista de eventos mock
-            Expanded(
-              child: ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: const Icon(Icons.event, size: 40),
-                      title: Text('Evento ${index + 1}'),
-                      subtitle: Text('Descripción del evento ${index + 1}'),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                      onTap: () => context.go('/events/${index + 1}'),
-                    ),
-                  );
-                },
-              ),
+    );
+  }
+
+  Widget _buildFeatureCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Gradient gradient,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: 28,
+                  color: Colors.white,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInspirationalSection(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.auto_stories_rounded,
+              color: Theme.of(context).colorScheme.primary,
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Versículo del Día',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '"Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis."',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontStyle: FontStyle.italic,
+              color: Colors.grey.shade700,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Jeremías 29:11',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -568,49 +929,6 @@ class EditEventScreen extends StatelessWidget {
   }
 }
 
-class ChurchesScreen extends StatelessWidget {
-  const ChurchesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Iglesias'),
-        automaticallyImplyLeading: false, // No mostrar flecha hacia atrás
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const Text(
-              'Iglesias Disponibles',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: const Icon(Icons.church, size: 40),
-                      title: Text('Iglesia ${index + 1}'),
-                      subtitle: Text('Ciudad ${index + 1} - 50 asistentes'),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                      onTap: () => context.go('/churches/${index + 1}'),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class ChurchDetailScreen extends StatelessWidget {
   final String churchId;
   const ChurchDetailScreen({super.key, required this.churchId});
@@ -624,143 +942,284 @@ class ChurchDetailScreen extends StatelessWidget {
   }
 }
 
-class FastingScreen extends StatelessWidget {
-  const FastingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ayunos'),
-        automaticallyImplyLeading: false, // No mostrar flecha hacia atrás
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => context.go('/create-fasting'),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const Text(
-              'Ayunos Activos',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 2,
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: const Icon(Icons.favorite, size: 40, color: Colors.red),
-                      title: Text('Ayuno ${index + 1}'),
-                      subtitle: Text('Por la paz mundial - ${index + 5} participantes'),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                      onTap: () => context.go('/fasting/${index + 1}'),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class FastingDetailScreen extends StatelessWidget {
-  final String fastingId;
-  const FastingDetailScreen({super.key, required this.fastingId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Detalle del Ayuno')),
-      body: Center(child: Text('Detalle del Ayuno: $fastingId')),
-    );
-  }
-}
-
-class CreateFastingScreen extends StatelessWidget {
-  const CreateFastingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Crear Ayuno')),
-      body: const Center(child: Text('Crear Ayuno')),
-    );
-  }
-}
-
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        automaticallyImplyLeading: false, // No mostrar flecha hacia atrás
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => context.go('/settings'),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 200,
+                floating: false,
+                pinned: true,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: _buildProfileHeader(context),
+                ),
+                actions: [
+                  Container(
+                    margin: const EdgeInsets.only(right: 16, top: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.settings_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: () => context.go('/settings'),
+                    ),
+                  ),
+                ],
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    _buildMenuSection(context),
+                    const SizedBox(height: 24),
+                    _buildTestSection(context),
+                    const SizedBox(height: 24),
+                    _buildLogoutButton(context),
+                  ]),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.secondary,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(60),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(56),
+              ),
+              child: CircleAvatar(
+                radius: 50,
+                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 50,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Juan Pérez',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          Text(
+            'miembro@test.com',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              'Miembro',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const CircleAvatar(
-              radius: 50,
-              child: Icon(Icons.person, size: 50),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Juan Pérez',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const Text(
-              'miembro@test.com',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 32),
-            ListTile(
-              leading: const Icon(Icons.church),
-              title: const Text('Mis Iglesias'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () => context.go('/churches'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.event),
-              title: const Text('Mis Eventos'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () => context.go('/events'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.favorite),
-              title: const Text('Mis Ayunos'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () => context.go('/fasting'),
-            ),
-            const Spacer(),
-            ElevatedButton.icon(
-              onPressed: () => context.go('/login'),
-              icon: const Icon(Icons.logout),
-              label: const Text('Cerrar Sesión'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
+    );
+  }
+
+  Widget _buildMenuSection(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildMenuTile(
+            context: context,
+            icon: Icons.church_rounded,
+            title: 'Mis Iglesias',
+            subtitle: 'Congregaciones que sigues',
+            color: Theme.of(context).colorScheme.primary,
+            onTap: () => context.go('/churches'),
+          ),
+          _buildDivider(),
+          _buildMenuTile(
+            context: context,
+            icon: Icons.event_note_rounded,
+            title: 'Mis Eventos',
+            subtitle: 'Eventos guardados y confirmados',
+            color: Theme.of(context).colorScheme.secondary,
+            onTap: () => context.go('/events'),
+          ),
+          _buildDivider(),
+          _buildMenuTile(
+            context: context,
+            icon: Icons.favorite_rounded,
+            title: 'Mis Ayunos',
+            subtitle: 'Ayunos en los que participas',
+            color: Theme.of(context).colorScheme.tertiary,
+            onTap: () => context.go('/fasting'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestSection(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.amber.shade200,
+          width: 1,
+        ),
+      ),
+      child: _buildMenuTile(
+        context: context,
+        icon: Icons.bug_report_rounded,
+        title: 'Cambiar Usuario (Testing)',
+        subtitle: 'Solo para pruebas de desarrollo',
+        color: Colors.amber.shade700,
+        onTap: () => context.go('/user-selector'),
+      ),
+    );
+  }
+
+  Widget _buildMenuTile({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          icon,
+          color: color,
+          size: 24,
+        ),
+      ),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Colors.grey.shade600,
+        ),
+      ),
+      trailing: Icon(
+        Icons.arrow_forward_ios_rounded,
+        color: Colors.grey.shade400,
+        size: 16,
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Divider(
+        height: 1,
+        color: Colors.grey.shade200,
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: ElevatedButton.icon(
+        onPressed: () => context.go('/login'),
+        icon: const Icon(Icons.logout_rounded),
+        label: const Text('Cerrar Sesión'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.red.shade500,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
         ),
       ),
     );

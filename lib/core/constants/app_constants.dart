@@ -3,6 +3,110 @@ class AppConstants {
   static const String appName = 'Eventos Cruz de Cristal';
   static const String appVersion = '1.0.0';
   
+  // Design Constants
+  static const double borderRadius = 12.0;
+  static const double cardBorderRadius = 16.0;
+  static const double buttonBorderRadius = 12.0;
+  static const double largeBorderRadius = 20.0;
+  
+  // Spacing
+  static const double paddingSmall = 8.0;
+  static const double paddingMedium = 16.0;
+  static const double paddingLarge = 24.0;
+  static const double paddingXLarge = 32.0;
+  
+  // Icon Sizes
+  static const double iconSmall = 16.0;
+  static const double iconMedium = 24.0;
+  static const double iconLarge = 32.0;
+  static const double iconXLarge = 48.0;
+  
+  // Text Sizes
+  static const double textSmall = 12.0;
+  static const double textMedium = 14.0;
+  static const double textLarge = 16.0;
+  static const double textXLarge = 18.0;
+  
+  // Elevation
+  static const double elevationLow = 2.0;
+  static const double elevationMedium = 4.0;
+  static const double elevationHigh = 8.0;
+  
+  // Animation Durations
+  static const Duration animationFast = Duration(milliseconds: 150);
+  static const Duration animationMedium = Duration(milliseconds: 300);
+  static const Duration animationSlow = Duration(milliseconds: 500);
+  
+  // Colors
+  static const primaryColorValue = 0xFF6366F1; // Indigo
+  static const secondaryColorValue = 0xFF8B5CF6; // Purple
+  static const tertiaryColorValue = 0xFF06B6D4; // Cyan
+  
+  // Gradients
+  static const List<int> primaryGradient = [0xFF6366F1, 0xFF8B5CF6];
+  static const List<int> secondaryGradient = [0xFF8B5CF6, 0xFF06B6D4];
+  static const List<int> accentGradient = [0xFF06B6D4, 0xFF10B981];
+  
+  // Bible Verses
+  static const List<Map<String, String>> bibleVerses = [
+    {
+      'verse': '"Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis."',
+      'reference': 'Jeremías 29:11'
+    },
+    {
+      'verse': '"Porque donde están dos o tres congregados en mi nombre, allí estoy yo en medio de ellos."',
+      'reference': 'Mateo 18:20'
+    },
+    {
+      'verse': '"No dejando de congregarnos, como algunos tienen por costumbre, sino exhortándonos..."',
+      'reference': 'Hebreos 10:25'
+    },
+    {
+      'verse': '"Todo tiene su tiempo, y todo lo que se quiere debajo del cielo tiene su hora."',
+      'reference': 'Eclesiastés 3:1'
+    },
+    {
+      'verse': '"Acercaos a Dios, y él se acercará a vosotros."',
+      'reference': 'Santiago 4:8'
+    },
+    {
+      'verse': '"Jehová es mi pastor; nada me faltará."',
+      'reference': 'Salmos 23:1'
+    },
+  ];
+  
+  // Feature Cards Data
+  static const List<Map<String, dynamic>> featureCards = [
+    {
+      'title': 'Eventos',
+      'subtitle': 'Próximos cultos y actividades',
+      'icon': 'event_note_rounded',
+      'route': '/events',
+      'gradientColors': primaryGradient,
+    },
+    {
+      'title': 'Iglesias',
+      'subtitle': 'Encuentra tu congregación',
+      'icon': 'church_rounded',
+      'route': '/churches',
+      'gradientColors': [secondaryColorValue, 0xFF8B5CF6],
+    },
+    {
+      'title': 'Ayunos',
+      'subtitle': 'Únete en oración y ayuno',
+      'icon': 'favorite_rounded',
+      'route': '/fasting',
+      'gradientColors': [tertiaryColorValue, 0xFF10B981],
+    },
+    {
+      'title': 'Configuración',
+      'subtitle': 'Personaliza tu experiencia',
+      'icon': 'settings_rounded',
+      'route': '/settings',
+      'gradientColors': [0xFF6B7280, 0xFF9CA3AF],
+    },
+  ];
+  
   // API Configuration
   static const String baseUrl = 'https://api.eventoscruzdecruzal.com/v1';
   static const String apiKey = 'YOUR_API_KEY_HERE';
@@ -75,4 +179,6 @@ class AppConstants {
   static const String fastingCreatedMessage = 'Ayuno creado exitosamente';
   static const String churchRegisteredMessage = 'Solicitud de iglesia enviada exitosamente';
   static const String profileUpdatedMessage = 'Perfil actualizado exitosamente';
+  
+  AppConstants._();
 } 

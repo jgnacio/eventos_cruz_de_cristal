@@ -133,6 +133,12 @@ class MockDataService {
     _currentUser = null;
   }
 
+  Future<UserModel> loginAsUser(UserModel user) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    _currentUser = user;
+    return user;
+  }
+
   UserModel? get currentUser => _currentUser;
 
   // Data Getters
