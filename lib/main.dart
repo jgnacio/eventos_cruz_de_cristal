@@ -1,16 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'config/router.dart';
 import 'core/constants/app_constants.dart';
+import 'core/services/local_notification_service.dart';
+import 'core/services/service_locator.dart';
+import 'core/services/firebase_auth_service.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Inicializar Firebase (cuando lo configuremos)
-  // await Firebase.initializeApp();
+  // Inicializar Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // Inicializar Hive para almacenamiento local
   // await Hive.initFlutter();
+  
+  // Inicializar notificaciones locales
+  await LocalNotificationService.initialize();
+  
+  // Inicializar servicios de Firebase
+  final serviceLocator = ServiceLocator();
+  if (serviceLocator.authService is FirebaseAuthService) {
+    await (serviceLocator.authService as dynamic).initialize();
+  }
   
   runApp(const MyApp());
 }

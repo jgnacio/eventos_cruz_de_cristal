@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reglas para usuarios
+    match /users/{userId} {
+      // Los usuarios pueden leer y escribir su propio documento
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Los administradores pueden leer todos los usuarios
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rol in ['administrador_global', 'administrador_iglesia'];
+    }
+    
+    // Reglas para iglesias
+    match /churches/{churchId} {
+      // Todos los usuarios autenticados pueden leer iglesias
+      allow read: if request.auth != null;
+      // Solo administradores pueden crear/editar iglesias
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rol in ['administrador_global', 'administrador_iglesia'];
+    }
+    
+    // Reglas para ayunos
+    match /fastings/{fastingId} {
+      // Todos los usuarios autenticados pueden leer ayunos
+      allow read: if request.auth != null;
+      // Solo administradores pueden crear/editar ayunos
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rol in ['administrador_global', 'administrador_iglesia'];
+    }
+    
+    // Reglas para registros de ayuno de usuarios
+    match /user_fasting_records/{recordId} {
+      // Los usuarios pueden leer y escribir sus propios registros
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Reglas para eventos
+    match /events/{eventId} {
+      // Todos los usuarios autenticados pueden leer eventos
+      allow read: if request.auth != null;
+      // Solo administradores pueden crear/editar eventos
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rol in ['administrador_global', 'administrador_iglesia'];
+    }
+  }
+} 

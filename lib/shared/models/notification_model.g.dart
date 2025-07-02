@@ -50,6 +50,8 @@ const _$NotificationTypeEnumMap = {
   NotificationType.recordatorioEvento: 'recordatorio_evento',
   NotificationType.cambioEvento: 'cambio_evento',
   NotificationType.ayunoAsignado: 'ayuno_asignado',
+  NotificationType.confirmacionAyuno: 'confirmacion_ayuno',
+  NotificationType.recordatorioAyuno: 'recordatorio_ayuno',
   NotificationType.global: 'global',
 };
 

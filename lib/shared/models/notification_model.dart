@@ -95,6 +95,10 @@ enum NotificationType {
   cambioEvento,
   @JsonValue('ayuno_asignado')
   ayunoAsignado,
+  @JsonValue('confirmacion_ayuno')
+  confirmacionAyuno,
+  @JsonValue('recordatorio_ayuno')
+  recordatorioAyuno,
   @JsonValue('global')
   global,
 }
@@ -120,6 +124,10 @@ extension NotificationTypeExtension on NotificationType {
         return 'Cambio en Evento';
       case NotificationType.ayunoAsignado:
         return 'Ayuno Asignado';
+      case NotificationType.confirmacionAyuno:
+        return 'Confirmación de Ayuno';
+      case NotificationType.recordatorioAyuno:
+        return 'Recordatorio de Ayuno';
       case NotificationType.global:
         return 'Notificación Global';
     }

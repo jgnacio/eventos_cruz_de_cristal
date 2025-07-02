@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "243238946971",
+    "project_id": "testingbackend-c3cbc",
+    "storage_bucket": "testingbackend-c3cbc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243238946971:android:ebe93c1b31ce79f4d29e3e",
+        "android_client_info": {
+          "package_name": "com.example.eventos_cruz_de_cristal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADhFmQHxgdpRwWkrTtuPbGxeWR2fW3j8U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
